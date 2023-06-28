@@ -24,13 +24,17 @@ func (r *RegisterController) RegisterHandler(ctx *gin.Context) {
 	var newUser dto.RegisterDTO
 
 	if err := ctx.ShouldBindJSON(&newUser); err != nil {
-		ctx.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		ctx.JSON(http.StatusBadRequest, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
 	err := r.registerService.CreateUser(&newUser)
 	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{"error": err})
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": err,
+		})
 		return
 	}
 

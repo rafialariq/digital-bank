@@ -2,10 +2,13 @@ package controller
 
 import (
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/rafialariq/digital-bank/models/dto"
 	"github.com/rafialariq/digital-bank/service"
+	"github.com/rafialariq/digital-bank/utility"
 )
 
 type LoginController struct {
@@ -33,6 +36,13 @@ func (l *LoginController) LoginHandler(ctx *gin.Context) {
 		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err})
 		return
 	}
+
+	// set cookie expiration time
+	authDuration, _ := strconv.Atoi(utility.DotEnv("AUTH_DURATION", ".env"))
+	expirationTime := time.Now().Add(time.Minute * time.Duration(authDuration)).Unix()
+
+	// set JWT token to cookie
+	ctx.SetCookie("token", res, int(expirationTime), "/", "localhost", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": res,

@@ -1,6 +1,8 @@
 package config
 
 import (
+	"strconv"
+
 	"github.com/rafialariq/digital-bank/utility"
 )
 
@@ -9,7 +11,8 @@ type ApiConfig struct {
 }
 
 type DbConfig struct {
-	Host, Port, User, Name, Password, SslMode string
+	Host, User, Name, Password, SslMode string
+	Port                                int
 }
 
 type AppConfig struct {
@@ -23,9 +26,11 @@ func (c *AppConfig) readConfigFile() {
 		ServerPort: utility.DotEnv("SERVER_PORT", envFilePath),
 	}
 
+	dbPort, _ := strconv.Atoi(utility.DotEnv("DB_PORT", envFilePath))
+
 	c.DbConfig = DbConfig{
 		Host:     utility.DotEnv("DB_HOST", envFilePath),
-		Port:     utility.DotEnv("DB_PORT", envFilePath),
+		Port:     dbPort,
 		User:     utility.DotEnv("DB_USER", envFilePath),
 		Name:     utility.DotEnv("DB_NAME", envFilePath),
 		Password: utility.DotEnv("DB_PASSWORD", envFilePath),
@@ -34,8 +39,8 @@ func (c *AppConfig) readConfigFile() {
 
 }
 
-func NewConfig() *AppConfig {
+func NewConfig() AppConfig {
 	config := AppConfig{}
 	config.readConfigFile()
-	return &config
+	return config
 }

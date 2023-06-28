@@ -2,10 +2,7 @@ package service
 
 import (
 	"errors"
-	"strconv"
-	"time"
 
-	"github.com/dgrijalva/jwt-go"
 	"github.com/rafialariq/digital-bank/models/dto"
 	"github.com/rafialariq/digital-bank/repository"
 	"github.com/rafialariq/digital-bank/utility"
@@ -38,17 +35,20 @@ func (l *loginService) FindUser(user *dto.LoginDTO) (string, error) {
 		return "", err
 	}
 
-	authDuration, _ := strconv.Atoi(utility.DotEnv("AUTH_DURATION", ".env"))
-
-	token := jwt.New(jwt.SigningMethodHS256)
-	claims := token.Claims.(jwt.MapClaims)
-	claims["username"] = existUser.Username
-	claims["exp"] = time.Now().Add(time.Minute * time.Duration(authDuration)).Unix()
-
-	signedToken, err := token.SignedString([]byte(utility.DotEnv("TOKEN_KEY", ".env")))
+	signedToken, err := utility.GenerateJWTToken(existUser.Id)
 	if err != nil {
 		return "", err
 	}
+
+	// token := jwt.New(jwt.SigningMethodHS256)
+	// claims := token.Claims.(jwt.MapClaims)
+	// claims["username"] = existUser.Username
+	// claims["exp"] = time.Now().Add(time.Minute * time.Duration(authDuration)).Unix()
+
+	// signedToken, err := token.SignedString([]byte(utility.DotEnv("TOKEN_KEY", ".env")))
+	// if err != nil {
+	// 	return "", err
+	// }
 
 	return signedToken, nil
 
