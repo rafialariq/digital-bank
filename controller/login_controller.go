@@ -33,7 +33,10 @@ func (l *LoginController) LoginHandler(ctx *gin.Context) {
 
 	res, err := l.loginService.FindUser(&user)
 	if err != nil {
-		ctx.JSON(http.StatusUnauthorized, gin.H{"error": err})
+		ctx.JSON(http.StatusUnauthorized, gin.H{
+			"error":  err,
+			"respon": res,
+		})
 		return
 	}
 
@@ -42,7 +45,7 @@ func (l *LoginController) LoginHandler(ctx *gin.Context) {
 	expirationTime := time.Now().Add(time.Minute * time.Duration(authDuration)).Unix()
 
 	// set JWT token to cookie
-	ctx.SetCookie("token", res, int(expirationTime), "/", "localhost", false, true)
+	ctx.SetCookie("token", res, int(expirationTime), "/", "", false, true)
 
 	ctx.JSON(http.StatusOK, gin.H{
 		"token": res,

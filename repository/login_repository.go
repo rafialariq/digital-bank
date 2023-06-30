@@ -29,13 +29,12 @@ func (l *loginRepository) GetUser(user *dto.LoginDTO) (*models.User, error) {
 		if err == gorm.ErrRecordNotFound {
 			return &existUser, errors.New("user not found")
 		}
-		// logging here
+
 		return &existUser, err
 	}
 
 	err = bcrypt.CompareHashAndPassword([]byte(existUser.Password), []byte(user.Password))
 	if err != nil {
-		// logging here
 		return &existUser, errors.New("username or password is not valid")
 	}
 

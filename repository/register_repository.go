@@ -1,7 +1,6 @@
 package repository
 
 import (
-	"errors"
 	"fmt"
 
 	"github.com/rafialariq/digital-bank/models"
@@ -24,7 +23,6 @@ func NewRegisterRepository(db *gorm.DB) RegisterRepository {
 
 func (r *registerRepository) InsertUser(user *models.User) error {
 	if err := r.db.Create(&user).Error; err != nil {
-		fmt.Println("error 1", err) // temporary
 		return err
 	}
 
@@ -35,15 +33,12 @@ func (r *registerRepository) FindExistingUser(user *dto.RegisterDTO) bool {
 	var existUser models.User
 	err := r.db.Where("username = ? OR phone_number = ?", user.Username, user.PhoneNumber).First(&existUser).Error
 	if err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			fmt.Println("error 2", err) // temporary
-			return true
+		if err == gorm.ErrRecordNotFound {
+			return false
 		}
 
-		// logging here
-		// not completed
-		fmt.Println("error 3", err) // temporray
+		fmt.Println(err)
 	}
 
-	return false
+	return true
 }

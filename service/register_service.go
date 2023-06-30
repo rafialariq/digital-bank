@@ -12,7 +12,7 @@ import (
 )
 
 type RegisterService interface {
-	CreateUser(*dto.RegisterDTO) error
+	CreateUser(*dto.RegisterDTO) (string, error)
 }
 
 type registerService struct {
@@ -25,33 +25,33 @@ func NewRegisterService(registerRepo repository.RegisterRepository) RegisterServ
 	}
 }
 
-func (r *registerService) CreateUser(user *dto.RegisterDTO) error {
+func (r *registerService) CreateUser(user *dto.RegisterDTO) (string, error) {
 
 	// password matching
 	if user.Password != user.PasswordConfirm {
-		return errors.New("password does not match")
+		return "password does not match", errors.New("password does not match")
 	}
 
 	// check if user already exist
 	if r.registerRepo.FindExistingUser(user) {
-		return errors.New("user already exist")
+		return "user already exist", errors.New("user already exist")
 	}
 
 	// field validation
 	if utility.IsUsernameInvalid(user.Username) {
-		return errors.New("invalid username")
+		return "invalid username", errors.New("invalid username")
 	} else if utility.IsPhoneInvalid(user.PhoneNumber) {
-		return errors.New("invalid phone number")
+		return "invalid phone number", errors.New("invalid phone number")
 	} else if utility.IsEmailInvalid(user.Email) {
-		return errors.New("invalid email")
+		return "invalid email", errors.New("invalid email")
 	} else if utility.IsPasswordInvalid(user.Password) {
-		return errors.New("invalid password")
+		return "invalid password", errors.New("invalid password")
 	}
 
 	// generate hashed password
 	hashedPass := utility.PasswordHashing(user.Password)
 
-	// assign dto.RegisterDTO to mo
+	// assign dto.RegisterDTO to model.User
 	newUser := models.User{
 		Id:          uuid.New(),
 		Username:    user.Username,
@@ -65,8 +65,8 @@ func (r *registerService) CreateUser(user *dto.RegisterDTO) error {
 
 	err := r.registerRepo.InsertUser(&newUser)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	return "new user created successfully", nil
 }

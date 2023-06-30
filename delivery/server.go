@@ -18,11 +18,14 @@ type AppServer struct {
 
 func (s *AppServer) menu() {
 	routes := s.engine.Group("/")
+	// routes.Use(middlewares.LogMiddleware())
 	routes.Use(middlewares.LogMiddleware())
-	// paymentRoutes := routes.Group("/payment")
-	// menuRoutes.Use(middlewares.AuthMiddleware())
+	menu := routes.Group("/")
+	menu.Use(middlewares.AuthMiddleware())
 	s.registerController(routes)
 	s.loginController(routes)
+	s.paymentController(menu)
+	s.logoutController(menu)
 
 }
 
@@ -32,6 +35,14 @@ func (s *AppServer) registerController(r *gin.RouterGroup) {
 
 func (s *AppServer) loginController(r *gin.RouterGroup) {
 	controller.NewLoginController(r, s.serviceManager.LoginService())
+}
+
+func (s *AppServer) paymentController(r *gin.RouterGroup) {
+	controller.NewPaymentController(r, s.serviceManager.PaymentService())
+}
+
+func (s *AppServer) logoutController(r *gin.RouterGroup) {
+	controller.NewLogoutController(r)
 }
 
 func (s *AppServer) Run() {

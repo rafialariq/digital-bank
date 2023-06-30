@@ -1,0 +1,31 @@
+CARA PENGGUNAAN :
+
+- Konfigurasi
+    - Pendaftaran user memerlukan informasi berikut;
+        1. "username"
+        2. "email"
+        3. "phone_number"
+        4. "password"
+        5. "password_confirm"
+    - Saldo user defaultnya adalah 0. Sehingga perlu diubah manual di database.
+    - Data merchant perlu ditamahkan manual di database yang terdiri dari 3 field;
+        1. "merchant_code"
+        2. "merchant_name"
+        3. "balanced"
+    - Memerlukan data environment variable yang harus disesuaikan.
+
+- Terdapat 4 endpoint yang terdiri dari;
+    1. "/register"  -> untuk pendaftaran user baru.
+    2. "/login"     -> untuk mendapatkan akses ke fitur utama melalui token JWT.
+    3. "/payment"   -> untuk melakukan transaksi pembayaran ke merchant.
+    4. "/logout"    -> untuk keluar dari menu utama.
+
+- Tutorial
+    1. Akses endpoint "/register" dan berikan data yang dibutuhkan melalui request body.
+    2. Seteleh user baru berhasil terdaftar. Akses endpoint "/login" untuk mendapatkan akses melalui token JWT
+    dengan cara memasukkan data "phone_number" dan "password" yang terdaftar melalui request body.
+    3. Akses endpoint "/payment" untuk melakukan transaksi pembayaran. Berikan informasi;
+        1. "sender_code"    -> no telp yang terdaftar.
+        2. "recepient_code" -> kode merchant tujuan.
+        3. "amount"         -> jumlah biaya yang ditransfer.
+    4. Akses endpoint "/logout" untuk mengakhiri akses.

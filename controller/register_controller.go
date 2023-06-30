@@ -25,18 +25,18 @@ func (r *RegisterController) RegisterHandler(ctx *gin.Context) {
 
 	if err := ctx.ShouldBindJSON(&newUser); err != nil {
 		ctx.JSON(http.StatusBadRequest, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	err := r.registerService.CreateUser(&newUser)
-	if err != nil {
-		ctx.JSON(http.StatusInternalServerError, gin.H{
 			"error": err,
 		})
 		return
 	}
 
-	ctx.JSON(http.StatusCreated, gin.H{"msg": "new user created successfully"})
+	msg, err := r.registerService.CreateUser(&newUser)
+	if err != nil {
+		ctx.JSON(http.StatusInternalServerError, gin.H{
+			"error": msg,
+		})
+		return
+	}
+
+	ctx.JSON(http.StatusCreated, gin.H{"msg": msg})
 }

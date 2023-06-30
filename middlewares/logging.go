@@ -2,73 +2,61 @@ package middlewares
 
 import (
 	"encoding/json"
-	"io"
+	// "io"
 	"os"
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 )
 
 type LogEntry struct {
-	Timestamp   time.Time `json:"timestamp"`
-	IPAddress   string    `json:"ip_address"`
-	Method      string    `json:"method"`
-	URL         string    `json:"url"`
-	RequestBody string    `json:"request_body"`
-	Latency     int64     `json:"latency"`
-	StatusCode  int       `json:"status_code"`
+	Timestamp  string `json:"timestamp"`
+	IPAddress  string `json:"ip_address"`
+	Method     string `json:"method"`
+	URL        string `json:"url"`
+	Latency    int64  `json:"latency"`
+	StatusCode int    `json:"status_code"`
 }
 
 func LogMiddleware() gin.HandlerFunc {
-	return func(c *gin.Context) {
-		// Mencatat waktu mulai request
+	// set JSON format
+	logrus.SetFormatter(&logrus.JSONFormatter{})
+
+	// open file
+	file, err := os.OpenFile("log.json", os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0644)
+	if err != nil {
+		logrus.Fatal("failed to open log file: ", err)
+	}
+	defer file.Close()
+
+	// set output destination
+	logrus.SetOutput(file)
+
+	return func(ctx *gin.Context) {
 		start := time.Now()
 
-		// Mencatat informasi dari request
-		entry := LogEntry{
-			Timestamp:   time.Now(),
-			IPAddress:   c.ClientIP(),
-			Method:      c.Request.Method,
-			URL:         c.Request.URL.Path,
-			RequestBody: "", // Isi dengan body request jika diperlukan
-		}
+		ctx.Next()
 
-		// Membaca body request jika ada
-		body, err := io.ReadAll(c.Request.Body)
-		if err == nil {
-			entry.RequestBody = string(body)
-		}
-
-		// Melanjutkan eksekusi handler berikutnya
-		c.Next()
-
-		// Menghitung latency
 		latency := time.Since(start)
 
-		// Mencatat informasi response
-		entry.Latency = latency.Milliseconds()
-		entry.StatusCode = c.Writer.Status()
-
-		// Melakukan logging ke file
-		file, err := os.OpenFile("log.json", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
-		if err != nil {
-			// log.Error("Failed to open log file:", err)
-			panic(err)
-		} else {
-			defer file.Close()
-
-			// Mengubah entry log menjadi format JSON
-			entryJSON, err := json.Marshal(entry)
-			if err != nil {
-				// log.Error("Failed to marshal log entry to JSON:", err)
-				panic(err)
-			} else {
-				// Menulis log ke file
-				if _, err := file.Write(entryJSON); err != nil {
-					// log.Error("Failed to write log entry:", err)
-					panic(err)
-				}
-			}
+		logEntry := LogEntry{
+			Timestamp:  time.Now().Format(time.RFC3339),
+			Method:     ctx.Request.Method,
+			IPAddress:  ctx.ClientIP(),
+			URL:        ctx.Request.URL.Path,
+			Latency:    int64(latency),
+			StatusCode: ctx.Writer.Status(),
 		}
+
+		logData, err := json.MarshalIndent(logEntry, "", "\t")
+		if err != nil {
+			logrus.Fatal("failed to marshal log entry: ", err)
+			return
+		}
+
+		// logData = append(logData, []byte("\n")...)
+
+		logrus.Info(string(logData))
 	}
 }

@@ -13,10 +13,10 @@ func IsUsernameInvalid(username string) bool {
 	maxUsername, _ := strconv.Atoi(DotEnv("MAX_UNAME", envfilepath))
 
 	if len(username) < minUsername || len(username) > maxUsername {
-		return false
+		return true
 	}
 
-	return true
+	return false
 }
 
 func IsPhoneInvalid(phoneNumber string) bool {
@@ -25,23 +25,23 @@ func IsPhoneInvalid(phoneNumber string) bool {
 	phoneNumber = strings.ReplaceAll(phoneNumber, " ", "")
 
 	if len(phoneNumber) < minPhoneNum || len(phoneNumber) > maxPhoneNum {
-		return false
+		return true
 	}
 
 	var validPhone = regexp.MustCompile(`^[0-9]+$`).MatchString(phoneNumber)
 
-	return validPhone
+	return !validPhone
 }
 
 func IsEmailInvalid(email string) bool {
 	for _, c := range email {
 		if c < 31 || c > 127 || strings.ContainsAny(string(c), `()<>,;:\\"[]`) {
-			return false
+			return true
 		}
 	}
 
 	emailRegex := regexp.MustCompile(`^[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}$`)
-	return emailRegex.MatchString(email)
+	return !emailRegex.MatchString(email)
 }
 
 func IsPasswordInvalid(password string) bool {
@@ -49,10 +49,10 @@ func IsPasswordInvalid(password string) bool {
 	maxPassword, _ := strconv.Atoi(DotEnv("MAX_PASS", envfilepath))
 
 	if len(password) <= minPassword || len(password) >= maxPassword {
-		return false
+		return true
 	} else if strings.ContainsAny(password, ` ^*+=-_()<>,;:\\"[]`) {
-		return false
+		return true
 	}
 
-	return true
+	return false
 }
